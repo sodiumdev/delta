@@ -1,0 +1,9 @@
+name: delta
+version: '${version}'
+bootstrapper: zip.sodium.delta.bootstrapper.DeltaBootstrapper
+main: zip.sodium.delta.Entrypoint
+api-version: '1.20'
+load: STARTUP
+authors: [sodium.zip]
+description: DeltaAPI. lol.
+website: https://sodium.zip
