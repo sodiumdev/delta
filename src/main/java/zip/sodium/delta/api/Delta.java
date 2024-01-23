@@ -26,7 +26,7 @@ import java.util.function.BiFunction;
 public final class Delta {
     private Delta() {}
 
-    private static Method REGISTER_BLOCK_ENTITY_METHOD;
+    private static final Method REGISTER_BLOCK_ENTITY_METHOD;
 
     static {
         try {
@@ -35,10 +35,9 @@ public final class Delta {
             REGISTER_BLOCK_ENTITY_METHOD.setAccessible(true);
         } catch (NoSuchMethodException e) {
             e.printStackTrace();
-
             System.err.println("Welp, the mappings are fucked");
 
-            REGISTER_BLOCK_ENTITY_METHOD = null;
+            throw new RuntimeException(e);
         }
     }
 

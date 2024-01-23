@@ -4,26 +4,31 @@ import net.minecraft.core.IdMapper;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
 import zip.sodium.delta.helper.BlockHelper;
+import zip.sodium.delta.helper.MappingHelper;
+import zip.sodium.delta.helper.RegistryHelper;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 
 public final class BlockStateIdMapper extends IdMapper<BlockState> {
-    private static Field ID_TO_T_FIELD;
-    private static Field T_TO_ID_FIELD;
-    private static Field NEXT_ID_FIELD;
+    private static final Field ID_TO_T_FIELD;
+    private static final Field T_TO_ID_FIELD;
+    private static final Field NEXT_ID_FIELD;
 
     static {
         try {
-            ID_TO_T_FIELD = IdMapper.class.getDeclaredField("idToT");
-            T_TO_ID_FIELD = IdMapper.class.getDeclaredField("tToId");
-            NEXT_ID_FIELD = IdMapper.class.getDeclaredField("nextId");
+            ID_TO_T_FIELD = MappingHelper.mapped(IdMapper.class, "idToT");
+            T_TO_ID_FIELD = MappingHelper.mapped(IdMapper.class, "tToId");
+            NEXT_ID_FIELD = MappingHelper.mapped(IdMapper.class, "nextId");
 
             ID_TO_T_FIELD.setAccessible(true);
             T_TO_ID_FIELD.setAccessible(true);
             NEXT_ID_FIELD.setAccessible(true);
         } catch (NoSuchFieldException e) {
             e.printStackTrace();
+            System.out.println("Welp, the mappings are fucked.");
+
+            throw new RuntimeException(e);
         }
     }
 

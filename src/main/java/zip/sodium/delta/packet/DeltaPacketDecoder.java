@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import java.io.IOException;
 import java.util.List;
 
+/* Credits to Bukkit and Paper and of course Minecraft */
 public final class DeltaPacketDecoder extends ByteToMessageDecoder implements ProtocolSwapHandler {
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final AttributeKey<ConnectionProtocol.CodecData<?>> CODEC_KEY = Connection.ATTRIBUTE_SERVERBOUND_PROTOCOL;

@@ -3,7 +3,8 @@ package zip.sodium.delta.agent;
 import org.bukkit.Material;
 import org.objectweb.asm.*;
 import org.objectweb.asm.util.TraceClassVisitor;
-import oshi.util.tuples.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import zip.sodium.delta.api.Delta;
 
 import java.io.FileWriter;
@@ -20,6 +21,10 @@ import java.util.Deque;
 import java.util.List;
 
 public final class DeltaAgent {
+    public record Pair<K, V>(K k, V v) {}
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(DeltaAgent.class);
+
     public static final List<Pair<String, Boolean>> FIELD_STACK = new ArrayList<>(256);
     public static final int DIVIDER = 128;
 
@@ -33,17 +38,10 @@ public final class DeltaAgent {
                 return classfileBuffer;
 
             final var reader = new ClassReader(classfileBuffer);
-
             final var writer = new ClassWriter(reader, ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
 
-            final FileWriter fileWriter;
-            try {
-                fileWriter = new FileWriter("code.txt");
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
             final var visitor = new ClassVisitor(
-                    Opcodes.ASM9, new TraceClassVisitor(writer, new PrintWriter(fileWriter))) {
+                    Opcodes.ASM9, writer) {
                 private int originalLength;
 
                 @Override
@@ -80,7 +78,7 @@ public final class DeltaAgent {
                                     return;
                                 }
 
-                                FIELD_STACK.forEach((pair) -> this.visitMaterialStore(pair.getA()));
+                                FIELD_STACK.forEach((pair) -> this.visitMaterialStore(pair.k()));
 
                                 super.visitInsn(Opcodes.ARETURN);
                             }
@@ -109,11 +107,11 @@ public final class DeltaAgent {
                             @Override
                             public void visitInsn(int opcode) {
                                 if (opcode == Opcodes.RETURN)
-                                    FIELD_STACK.stream().filter(Pair::getB).forEach(x -> {
+                                    FIELD_STACK.stream().filter(Pair::v).forEach(x -> {
                                         super.visitFieldInsn(
                                                 Opcodes.GETSTATIC,
                                                 materialClassName,
-                                                x.getA(),
+                                                x.k(),
                                                 materialDescriptor
                                         );
 
@@ -143,7 +141,7 @@ public final class DeltaAgent {
 
                                 super.visitFieldInsn(opcode, owner, name, descriptor);
 
-                                FIELD_STACK.forEach((pair) -> this.visitMaterialField(pair.getA()));
+                                FIELD_STACK.forEach((pair) -> this.visitMaterialField(pair.k()));
                             }
 
                             private void visitMaterialField(final String name) {
@@ -186,7 +184,7 @@ public final class DeltaAgent {
                             | Opcodes.ACC_STATIC
                             | Opcodes.ACC_FINAL
                             | Opcodes.ACC_ENUM,
-                    newFieldName.getA(),
+                    newFieldName.k(),
                     materialDescriptor,
                     null,
                     null
@@ -196,8 +194,7 @@ public final class DeltaAgent {
 
             FIELD_STACK.clear();
 
-            System.out.println("do we get here");
-
+            LOGGER.info("Successfully modified materials!");
             return writer.toByteArray();
         }
     }
@@ -209,7 +206,7 @@ public final class DeltaAgent {
 
         for (int i = 0; i < DIVIDER * 2; i++) {
             FIELD_STACK.add(
-                    new Pair<>(
+                    new Pair(
                             "DELTA_MAT_" + i,
                             i > (DIVIDER - 1)
                     )
@@ -217,18 +214,6 @@ public final class DeltaAgent {
         }
 
         inst.addTransformer(new DeltaClassTransformer());
-
-        transformMaterial();
-
-        Delta.init();
-    }
-
-    public static void transformMaterial() {
-        try {
-            instrumentation.retransformClasses(Material.class);
-        } catch (UnmodifiableClassException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     public static Instrumentation getInstrumentation() {

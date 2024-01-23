@@ -11,6 +11,7 @@ import io.papermc.paper.plugin.bootstrap.PluginProviderContext;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import zip.sodium.delta.Entrypoint;
+import zip.sodium.delta.api.Delta;
 import zip.sodium.delta.helper.UnsafeHelper;
 
 import java.io.IOException;
@@ -20,6 +21,8 @@ public final class DeltaBootstrapper implements PluginBootstrap {
     @Override
     public void bootstrap(@NotNull BootstrapContext context) {
         attachAgent(context.getPluginSource().toAbsolutePath().toString());
+
+        Delta.init();
     }
 
     private void attachAgent(final String path) {

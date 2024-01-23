@@ -1,5 +1,6 @@
 package zip.sodium.delta.helper;
 
+import io.papermc.paper.util.ObfHelper;
 import net.minecraft.core.IdMapper;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.world.item.BlockItem;
@@ -7,35 +8,34 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
 import org.bukkit.craftbukkit.v1_20_R3.util.CraftMagicNumbers;
-import org.bukkit.material.MaterialData;
 import zip.sodium.delta.agent.DeltaAgent;
 import zip.sodium.delta.api.interfaces.DeltaBlock;
 import zip.sodium.delta.api.interfaces.DeltaItem;
 import zip.sodium.delta.blockstate.BlockStateIdMapper;
-import zip.sodium.delta.bootstrapper.DeltaBootstrapper;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public final class RegistryHelper {
     private RegistryHelper() {}
 
-    private static Field REGISTRY_FROZEN_FIELD;
-    private static Field REGISTRY_INTRUSIVE_HOLDERS_FIELD;
+    private static final Field REGISTRY_FROZEN_FIELD;
+    private static final Field REGISTRY_INTRUSIVE_HOLDERS_FIELD;
 
-    private static Map<Item, Material> ITEM_MATERIAL;
-    private static Map<Material, Item> MATERIAL_ITEM;
+    private static final Map<Item, Material> ITEM_MATERIAL;
+    private static final Map<Material, Item> MATERIAL_ITEM;
 
-    private static Map<Block, Material> BLOCK_MATERIAL;
-    private static Map<Material, Block> MATERIAL_BLOCK;
+    private static final Map<Block, Material> BLOCK_MATERIAL;
+    private static final Map<Material, Block> MATERIAL_BLOCK;
 
     static {
         try {
-            REGISTRY_FROZEN_FIELD = MappedRegistry.class.getDeclaredField("frozen");
-            REGISTRY_INTRUSIVE_HOLDERS_FIELD = MappedRegistry.class.getDeclaredField("unregisteredIntrusiveHolders");
+            REGISTRY_FROZEN_FIELD = MappingHelper.mapped(MappedRegistry.class, "frozen");
+            REGISTRY_INTRUSIVE_HOLDERS_FIELD = MappingHelper.mapped(MappedRegistry.class, "unregisteredIntrusiveHolders");
 
             REGISTRY_FROZEN_FIELD.setAccessible(true);
             REGISTRY_INTRUSIVE_HOLDERS_FIELD.setAccessible(true);
@@ -58,7 +58,7 @@ public final class RegistryHelper {
             BLOCK_MATERIAL = (Map<Block, Material>) cmnbmf.get(null);
             MATERIAL_BLOCK = (Map<Material, Block>) cmnmbf.get(null);
 
-            final var blockStateRegistry = Block.class.getDeclaredField("BLOCK_STATE_REGISTRY");
+            final var blockStateRegistry = MappingHelper.mapped(Block.class, "BLOCK_STATE_REGISTRY");
             blockStateRegistry.setAccessible(true);
 
             UnsafeHelper.setStaticField(blockStateRegistry, new BlockStateIdMapper((IdMapper<BlockState>) blockStateRegistry.get(null)));
@@ -66,8 +66,7 @@ public final class RegistryHelper {
             e.printStackTrace();
             System.err.println("Welp, the mappings are fucked");
 
-            REGISTRY_FROZEN_FIELD = null;
-            REGISTRY_INTRUSIVE_HOLDERS_FIELD = null;
+            throw new RuntimeException(e);
         }
     }
 

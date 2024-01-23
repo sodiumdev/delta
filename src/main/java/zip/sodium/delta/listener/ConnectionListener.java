@@ -6,6 +6,7 @@ import org.bukkit.craftbukkit.v1_20_R3.entity.CraftPlayer;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
+import zip.sodium.delta.helper.MappingHelper;
 import zip.sodium.delta.helper.UnsafeHelper;
 import zip.sodium.delta.packet.DeltaPacketDecoder;
 import zip.sodium.delta.packet.DeltaPacketEncoder;
@@ -14,18 +15,17 @@ import zip.sodium.delta.player.DeltaSPGM;
 import java.lang.reflect.Field;
 
 public final class ConnectionListener implements Listener {
-    private static Field SERVER_PLAYER_GAME_MODE_FIELD;
+    private static final Field SERVER_PLAYER_GAME_MODE_FIELD;
 
     static {
         try {
-            SERVER_PLAYER_GAME_MODE_FIELD = ServerPlayer.class.getDeclaredField("gameMode");
+            SERVER_PLAYER_GAME_MODE_FIELD = MappingHelper.mapped(ServerPlayer.class, "gameMode");
             SERVER_PLAYER_GAME_MODE_FIELD.setAccessible(true);
         } catch (NoSuchFieldException e) {
             e.printStackTrace();
+            System.err.println("Welp, the mappings are fucked");
 
-            System.err.println("Welp, the mappings are definitely fucked");
-
-            SERVER_PLAYER_GAME_MODE_FIELD = null;
+            throw new RuntimeException(e);
         }
     }
 
