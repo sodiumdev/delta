@@ -4,7 +4,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -28,12 +27,11 @@ public interface DeltaBlock extends DeltaObject<Block, BlockState> {
         return BuiltInRegistries.BLOCK;
     }
 
-    @ApiStatus.NonExtendable
     default Block getReplacement(final @Nullable ServerPlayer player) {
         return getDelta(cast().defaultBlockState(), player);
     }
 
-    default boolean shouldMineServerSide(final @Nullable ServerPlayer player, final @NotNull BlockState state, final @NotNull BlockPos pos) {
+    default boolean handlesMiningServerSide(final @Nullable ServerPlayer player, final @NotNull BlockState state, final @NotNull BlockPos pos) {
         return true;
     }
 

@@ -16,12 +16,15 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.loot.LootParams;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -32,13 +35,14 @@ import zip.sodium.delta.helper.BlockHelper;
 
 import java.util.Arrays;
 import java.util.UUID;
+import java.util.function.BiConsumer;
 
 import static net.minecraft.world.level.block.LevelEvent.PARTICLES_DESTROY_BLOCK;
 
 public abstract class TexturedDeltaBlock extends Block implements DeltaBlock, EntityBlock {
-    protected static Display.ItemDisplay spawnSingleQuarter(final Level world,
-                                                            final Vec3 pos,
-                                                            final String texture) {
+    protected Display.ItemDisplay spawnSingleQuarter(final Level world,
+                                                     final Vec3 pos,
+                                                     final String texture) {
         final var quarter = EntityType.ITEM_DISPLAY.create(world);
         quarter.setItemStack(newPlayerHead(texture));
 
@@ -47,17 +51,8 @@ public abstract class TexturedDeltaBlock extends Block implements DeltaBlock, En
         return quarter;
     }
 
-    protected static Display.ItemDisplay[] spawnQuarters(final Level world,
-                                                         final BlockPos pos,
-
-                                                         final String texture1,
-                                                         final String texture2,
-                                                         final String texture3,
-                                                         final String texture4,
-                                                         final String texture5,
-                                                         final String texture6,
-                                                         final String texture7,
-                                                         final String texture8) {
+    protected Display.ItemDisplay[] spawnQuarters(final Level world,
+                                                  final BlockPos pos) {
         final var quarter1 = spawnSingleQuarter(
                 world,
                 Vec3.atLowerCornerWithOffset(pos, 0.25, 0.5, 0.25),
@@ -127,7 +122,7 @@ public abstract class TexturedDeltaBlock extends Block implements DeltaBlock, En
         };
     }
 
-    protected static ItemStack newPlayerHead(final String texture) {
+    protected ItemStack newPlayerHead(final String texture) {
         final var stack = new ItemStack(Items.PLAYER_HEAD);
         final var profile = new GameProfile(
                 UUID.randomUUID(),
@@ -144,10 +139,53 @@ public abstract class TexturedDeltaBlock extends Block implements DeltaBlock, En
         return stack;
     }
 
-    public TexturedDeltaBlock(Properties settings) {
+    protected final String texture1;
+    protected final String texture2;
+    protected final String texture3;
+    protected final String texture4;
+    protected final String texture5;
+    protected final String texture6;
+    protected final String texture7;
+    protected final String texture8;
+
+    public TexturedDeltaBlock(
+            final Properties settings,
+            final String texture1,
+            final String texture2,
+            final String texture3,
+            final String texture4,
+            final String texture5,
+            final String texture6,
+            final String texture7,
+            final String texture8) {
         super(settings);
 
         DeltaPlugin.TEXTURED_BLOCKS.add(this);
+
+        this.texture1 = texture1;
+        this.texture2 = texture2;
+        this.texture3 = texture3;
+        this.texture4 = texture4;
+        this.texture5 = texture5;
+        this.texture6 = texture6;
+        this.texture7 = texture7;
+        this.texture8 = texture8;
+    }
+
+    public TexturedDeltaBlock(
+            final Properties settings,
+            final String texture) {
+        this(
+                settings,
+                texture,
+                texture,
+                texture,
+                texture,
+                texture,
+                texture,
+                texture,
+                texture
+        );
     }
 
     @Override
@@ -172,28 +210,10 @@ public abstract class TexturedDeltaBlock extends Block implements DeltaBlock, En
 
         final var be = DeltaBlock.<TexturedDeltaBlockEntity>getBlockEntityAt(world, pos);
 
-        final var texture = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNzMyZGJkNjYxMmU5ZDNmNDI5NDdiNWNhODc4NWJmYjMzNDI1OGYzY2ViODNhZDY5YTVjZGVlYmVhNGNkNjUifX19";
-
         be.ids = Arrays.stream(spawnQuarters(
                 world,
-                pos,
-
-                texture, texture, texture, texture,
-                texture, texture, texture, texture
+                pos
         )).map(Entity::getStringUUID).toList();
-    }
-
-    @Override
-    public void onRemove(final @NotNull BlockState state, final @NotNull Level level, final @NotNull BlockPos pos, final @NotNull BlockState newState, final boolean moved) {
-        org.spigotmc.AsyncCatcher.catchOp("block remove");
-        if (state.is(newState.getBlock()))
-            return;
-
-        final var world = (ServerLevel) level;
-        final var be = DeltaBlock.<TexturedDeltaBlockEntity>getBlockEntityAt(world, pos);
-        be.ids.forEach(id -> world.getEntity(UUID.fromString(id)).discard());
-
-        world.removeBlockEntity(pos);
     }
 
     @Override

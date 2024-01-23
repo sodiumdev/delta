@@ -36,6 +36,10 @@ public class DeltaByteBuf extends FriendlyByteBuf {
         nbt.putString(DeltaItem.DELTA_ITEM_ID, BuiltInRegistries.ITEM.getKey(stack.getItem()).toString());
         nbt.putInt("HideFlags", 255);
 
+        final var item = (DeltaItem) stack.getItem();
+        if (item.getCustomModelData() != null)
+            nbt.putInt("CustomModelData", item.getCustomModelData());
+
         nbt.put(DeltaItem.DELTA_ITEM_REAL_NBT_ID, stack.getOrCreateTag());
 
         final var translatable = stack.getItem().getDescriptionId();

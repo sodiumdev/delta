@@ -192,7 +192,7 @@ public final class DeltaSPGM extends ServerPlayerGameMode {
     }
 
     private void breakIfTakingTooLong(BlockState state, BlockPos pos) {
-        if (!BlockHelper.shouldMineServerSide(player, state, pos)) {
+        if (!BlockHelper.handlesMiningServerSide(player, state, pos)) {
             if (hasMiningFatigue)
                 clearMiningEffect();
 
@@ -377,7 +377,7 @@ public final class DeltaSPGM extends ServerPlayerGameMode {
 
     private void enforceBlockBreakingCooldown(BlockPos pos, ServerboundPlayerActionPacket.Action action) {
         final var state = level.getBlockState(pos);
-        if (!BlockHelper.shouldMineServerSide(player, state, pos)) {
+        if (!BlockHelper.handlesMiningServerSide(player, state, pos)) {
             if (hasMiningFatigue)
                 clearMiningEffect();
 
@@ -420,7 +420,7 @@ public final class DeltaSPGM extends ServerPlayerGameMode {
         this.sequence = sequence;
 
         var state = player.level().getBlockState(pos);
-        if (!BlockHelper.shouldMineServerSide(player, state, pos)) {
+        if (!BlockHelper.handlesMiningServerSide(player, state, pos)) {
             if (hasMiningFatigue)
                 clearMiningEffect();
 

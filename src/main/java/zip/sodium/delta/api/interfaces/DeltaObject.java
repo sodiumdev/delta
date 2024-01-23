@@ -13,7 +13,6 @@ public interface DeltaObject<T, V> {
     @ApiStatus.NonExtendable
     Registry<T> getRegistry();
 
-    @ApiStatus.NonExtendable
     T getReplacement(@Nullable ServerPlayer player);
 
     @ApiStatus.NonExtendable

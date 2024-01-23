@@ -31,6 +31,7 @@ public abstract class DeltaPlugin extends JavaPlugin {
     protected void load() {}
     protected void register() {}
     protected void enable() {}
+    protected void disable() {}
 
     @Override
     public final void onLoad() {
@@ -51,5 +52,10 @@ public abstract class DeltaPlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new ConnectionListener(), this);
 
         enable();
+    }
+
+    @Override
+    public final void onDisable() {
+        disable();
     }
 }

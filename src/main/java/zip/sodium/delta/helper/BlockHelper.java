@@ -39,8 +39,8 @@ public final class BlockHelper {
         );
     }
 
-    public static boolean shouldMineServerSide(ServerPlayer player, BlockState state, BlockPos pos) {
+    public static boolean handlesMiningServerSide(ServerPlayer player, BlockState state, BlockPos pos) {
         return state.getBlock() instanceof DeltaBlock deltaBlock
-                && deltaBlock.shouldMineServerSide(player, state, pos);
+                && deltaBlock.handlesMiningServerSide(player, state, pos);
     }
 }

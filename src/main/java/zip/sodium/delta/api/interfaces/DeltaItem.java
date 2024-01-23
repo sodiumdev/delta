@@ -17,8 +17,11 @@ public interface DeltaItem extends DeltaObject<Item, ItemStack> {
         return BuiltInRegistries.ITEM;
     }
 
-    @ApiStatus.NonExtendable
     default Item getReplacement(@Nullable ServerPlayer player) {
         return getDelta(((Item) this).getDefaultInstance(), player);
+    }
+
+    default Integer getCustomModelData() {
+        return null;
     }
 }
